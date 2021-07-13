@@ -38,6 +38,7 @@ docker run \
 	-v /tmp/fact-docker-tmp:/tmp/fact-docker-tmp \
 	-p 5000:5000 \
 	fkiecad/fact start
+
 ```
 
 ## Advanced usage
@@ -54,7 +55,15 @@ you.
 Also be aware that the `temp_dir_path` in `main.cfg` has to match the path
 specified by `--docker-dir`.
 
-# Distributed setup
+## Entrypoint
+The docker entrypoint accepts three arguments.
+`start` to start the container.
+
+`pull-containers` to pull docker containers needed on the host.
+
+`start-branch` to checkout a different branch before running FACT.
+
+## Distributed setup
 If you want to have a distributed setup you have to build the three images.
 For this you can simply adapt the Dockerfile to install the respective
 components and change the entrypoint.

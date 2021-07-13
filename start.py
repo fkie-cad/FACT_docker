@@ -44,6 +44,11 @@ def run(args):
     if args.config_path is None:
         config_cmd = ""
 
+    start_cmd = "start"
+    if args.branch is not None:
+        start_cmd = f"start-branch {args.branch}"
+
+
     cmd = f"""docker run -it \
     --name {args.name} \
     --hostname {args.name} \
@@ -56,7 +61,7 @@ def run(args):
     -v {args.docker_dir}:{args.docker_dir} \
     -p {args.port}:5000 \
     {config_cmd} \
-    {args.image} start
+    {args.image} {start_cmd}
     """
 
     subprocess.run(cmd.split())
@@ -100,6 +105,7 @@ def main():
     run_p.add_argument("--wt-mongodb-path", required=True, help="The path to the fact_wt_mongodb directory on the host. The group must have rwx permissions.")
     run_p.add_argument("--fw-data-path", required=True, help="Path to fact_fw_data directory on the host. The group must have rwx permissions.")
     run_p.add_argument("--config-path", help="The directory that contains the FACT configuration. If ommited use the config in the container.")
+    run_p.add_argument("--branch", help="The branch of FACT to start")
 
     start_p = subparsers.add_parser("start", help="Start container", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     start_p.set_defaults(func=start)
