@@ -1,9 +1,15 @@
 FROM ubuntu:focal
 
-RUN apt -y update && apt -y upgrade
-RUN DEBIAN_FRONTEND="noninteractive" apt -y install --no-install-recommends tzdata
-# Install deps that are not automatically installed by pre_install.sh
-RUN apt -y install --no-install-recommends git sudo ca-certificates patch lsb-release wget
+# Upgrade system and install dependencies of the installer
+RUN apt -y update && apt -y upgrade && \
+    DEBIAN_FRONTEND="noninteractive" apt -y install --no-install-recommends \
+        ca-certificates \
+        git \
+        lsb-release \
+        patch \
+        sudo \
+        tzdata \
+        wget
 
 RUN useradd -r fact
 RUN printf 'fact	ALL=(ALL:ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/99_fact
