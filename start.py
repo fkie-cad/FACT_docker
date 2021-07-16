@@ -92,7 +92,7 @@ def main():
 
     build_p = subparsers.add_parser("build", help="Build the FACT image.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     build_p.set_defaults(func=build)
-    build_p.add_argument("--tag", default="fkiecad/fact", help="The tag that the build image should have.")
+    build_p.add_argument("--tag", default="fkiecad/fact", help="The tag that the built image should have.")
 
     pull_p = subparsers.add_parser("pull", help="Pull or build all neccessary docker containers required to run FACT.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     pull_p.set_defaults(func=pull)
