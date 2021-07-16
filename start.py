@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 
 import argparse
-import sys
-import os
-import subprocess
 import grp
+import os
 import pathlib
+import subprocess
+
 
 def build(args):
     cmd = f"docker build --rm -t {args.tag} ."
 
     subprocess.run(cmd.split())
+
 
 def pull(args):
     docker_gid = grp.getgrnam("docker").gr_gid
@@ -20,25 +21,31 @@ def pull(args):
     -it \
     --rm \
     --group-add {docker_gid} \
-    -v {docker_socket}:/var/run/docker.sock \
+    --mount type=bind,source={docker_socket},destination=/var/run/docker.sock \
     {args.image} pull-containers
     """
 
     subprocess.run(cmd.split())
+
 
 def remove(args):
     cmd = f"docker rm {args.name}"
 
     subprocess.run(cmd.split())
 
-def run(args):
-    # Always initialize the db on the first run
-    pathlib.Path(f"{args.wt_mongodb_path}/REINITIALIZE_DB").touch()
 
+def run(args):
     docker_gid = grp.getgrnam("docker").gr_gid
     docker_socket = os.getenv("DOCKER_HOST", default="/var/run/docker.sock")
     mongodb_path_gid = os.stat(args.wt_mongodb_path).st_gid
     fw_data_path_gid = os.stat(args.fw_data_path).st_gid
+
+    # Always initialize the db on the first run
+    pathlib.Path(f"{args.wt_mongodb_path}/REINITIALIZE_DB").touch()
+    pathlib.Path(args.docker_dir).mkdir(mode=0o770, parents=True, exist_ok=True)
+
+    os.chown(args.docker_dir, -1, docker_gid)
+
     # TODO the config in the container might mismatch with what we have configured here
     config_cmd = f"--mount type=bind,source={args.config_path},destination=/opt/FACT_core/src/config"
     if args.config_path is None:
@@ -48,17 +55,16 @@ def run(args):
     if args.branch is not None:
         start_cmd = f"start-branch {args.branch}"
 
-
     cmd = f"""docker run -it \
     --name {args.name} \
     --hostname {args.name} \
     --group-add {docker_gid} \
-    -v {docker_socket}:/var/run/docker.sock \
+    --mount type=bind,source={docker_socket},destination=/var/run/docker.sock \
     --group-add {mongodb_path_gid} \
-    -v {args.wt_mongodb_path}:/media/data/fact_wt_mongodb \
+    --mount type=bind,source={args.wt_mongodb_path},destination=/media/data/fact_wt_mongodb \
     --group-add {fw_data_path_gid} \
-    -v {args.fw_data_path}:/media/data/fact_fw_data \
-    -v {args.docker_dir}:{args.docker_dir} \
+    --mount type=bind,source={args.fw_data_path},destination=/media/data/fact_fw_data \
+    --mount type=bind,source={args.docker_dir},destination={args.docker_dir} \
     -p {args.port}:5000 \
     {config_cmd} \
     {args.image} {start_cmd}
@@ -72,10 +78,12 @@ def start(args):
 
     subprocess.run(cmd.split())
 
+
 def stop(args):
     cmd = f"docker stop {args.name}"
 
     subprocess.run(cmd.split())
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -119,4 +127,5 @@ def main():
     args.func(args)
 
 
-main()
+if __name__ == "__main__":
+    main()
