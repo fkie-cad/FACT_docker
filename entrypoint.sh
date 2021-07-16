@@ -31,6 +31,6 @@ case "$1" in
             --frontend-docker-images
     ;;
     *)
-        printf "See https://github.com/fkie-cad/FACT_core/blob/master/docker/README.md for how to start this container\n"
+        printf "See https://github.com/fkie-cad/FACT_docker for how to start this container\n"
         exit 0
 esac
