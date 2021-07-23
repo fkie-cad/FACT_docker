@@ -20,7 +20,7 @@ RUN mkdir /var/log/fact && chown fact: /var/log/fact
 USER fact:fact
 WORKDIR /var/log/fact
 
-RUN git clone --branch docker-dev https://github.com/fkie-cad/FACT_core.git /opt/FACT_core
+RUN git clone https://github.com/fkie-cad/FACT_core.git /opt/FACT_core
 
 RUN /opt/FACT_core/src/install/pre_install.sh
 RUN FACT_INSTALLER_SKIP_DOCKER=y /opt/FACT_core/src/install.py
