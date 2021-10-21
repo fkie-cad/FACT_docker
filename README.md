@@ -48,7 +48,8 @@ If your usecase is not supported feel free to open a PR or hack it up privately.
 Run `./start.py --help` to get help abuot the usage of the script.
 
 If you use `--config` and change anything related to the mongodb
-database run `touch YOUR_FACT_WT_MONGODB_PATH/REINITIALIZE_DB`.
+database run ```touch <your fact_wt_mongodb path>/REINITIALIZE_DB```
+(i.e. `touch /media/data/fact_wt_mongodb/REINITIALIZE_DB`).
 This will tell the container to (re)initialize the database.
 If you use the container the first time the script does this automatically for
 you.
