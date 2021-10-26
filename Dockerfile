@@ -11,7 +11,7 @@ RUN apt -y update && apt -y upgrade && \
         tzdata \
         wget
 
-RUN useradd -r fact
+RUN useradd -r --no-create-home -d /var/log/fact fact
 RUN printf 'fact	ALL=(ALL:ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/99_fact
 
 RUN mkdir /opt/FACT_core && chown fact: /opt/FACT_core
