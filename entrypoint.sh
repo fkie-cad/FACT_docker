@@ -10,6 +10,15 @@ start () {
         python3 /opt/FACT_core/src/init_database.py && \
             rm /media/data/fact_wt_mongodb/REINITIALIZE_DB
     fi
+
+    # TODO This only works when the radare server runs on the docker host
+    # Probably the start_fact_frontend.py should not start radare but rather
+    # let the user start the radare container (and use docker-compose)
+    radare2_host=$(/sbin/ip route|awk '/default/ { print $3 }')
+
+    # If the user provides a different configuration the patch will fail
+    sed "s/RADARE2_HOST/$radare2_host/" /opt/FACT_core/0002_main_cfg.patch.template | patch /opt/FACT_core/src/config/main.cfg || true
+
     exec /opt/FACT_core/start_all_installed_fact_components "$@"
 }
 
