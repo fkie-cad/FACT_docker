@@ -7,21 +7,40 @@ import pathlib
 import subprocess
 
 
+def pass_docker_socket_args(args):
+    docker_gid = grp.getgrnam("docker").gr_gid
+    docker_socket = os.getenv("DOCKER_HOST", default="/var/run/docker.sock")
+
+    return f"""\
+    --group-add {docker_gid} \
+    --mount type=bind,source={docker_socket},destination=/var/run/docker.sock \
+    """
+
+
 def build(args):
     cmd = f"docker build --rm -t {args.tag} ."
 
     subprocess.run(cmd.split())
 
 
-def pull(args):
-    docker_gid = grp.getgrnam("docker").gr_gid
-    docker_socket = os.getenv("DOCKER_HOST", default="/var/run/docker.sock")
-
+def pytest(args):
+    # Some test use docker
     cmd = f"""docker run \
+    {pass_docker_socket_args(args)} \
     -it \
     --rm \
-    --group-add {docker_gid} \
-    --mount type=bind,source={docker_socket},destination=/var/run/docker.sock \
+    {args.image}
+    pytest {" ".join(args.pass_to_pytest)}
+    """
+
+    subprocess.run(cmd.split())
+
+
+def pull(args):
+    cmd = f"""docker run \
+    {pass_docker_socket_args(args)} \
+    -it \
+    --rm \
     {args.image} pull-containers
     """
 
@@ -36,7 +55,6 @@ def remove(args):
 
 def run(args):
     docker_gid = grp.getgrnam("docker").gr_gid
-    docker_socket = os.getenv("DOCKER_HOST", default="/var/run/docker.sock")
     mongodb_path_gid = os.stat(args.wt_mongodb_path).st_gid
     fw_data_path_gid = os.stat(args.fw_data_path).st_gid
 
@@ -55,11 +73,11 @@ def run(args):
     if args.branch is not None:
         start_cmd = f"start-branch {args.branch}"
 
-    cmd = f"""docker run -it \
+    cmd = f"""docker run \
+    {pass_docker_socket_args(args)} \
+    -it \
     --name {args.name} \
     --hostname {args.name} \
-    --group-add {docker_gid} \
-    --mount type=bind,source={docker_socket},destination=/var/run/docker.sock \
     --group-add {mongodb_path_gid} \
     --mount type=bind,source={args.wt_mongodb_path},destination=/media/data/fact_wt_mongodb \
     --group-add {fw_data_path_gid} \
@@ -122,6 +140,11 @@ def main():
     stop_p = subparsers.add_parser("stop", help="Stop a running container", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     stop_p.set_defaults(func=stop)
     stop_p.add_argument("--name", default="fact", help="The FACT container name")
+
+    pytest_p = subparsers.add_parser("pytest", help="Run pytest on FACT in the container. Additional arguments will be passed to pytest.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    pytest_p.set_defaults(func=pytest)
+    pytest_p.add_argument("--image", default="fkiecad/fact", help="The FACT image name.")
+    pytest_p.add_argument("pass_to_pytest", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
 
     args = parser.parse_args()
     args.func(args)

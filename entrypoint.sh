@@ -40,7 +40,13 @@ case "$1" in
             --backend-docker-images \
             --frontend-docker-images
     ;;
+    "pytest")
+        shift 1
+        cd /opt/FACT_core
+        pytest $@
+    ;;
     *)
+        # This script is supposed to always be called by start.py so refer to it here
         printf "See https://github.com/fkie-cad/FACT_docker for how to start this container\n"
         exit 0
 esac
