@@ -34,5 +34,7 @@ COPY --chown=fact:fact 0001_main_cfg.patch /tmp/0001_main_cfg.patch
 RUN patch /opt/FACT_core/src/config/main.cfg < /tmp/0001_main_cfg.patch \
     && rm /tmp/0001_main_cfg.patch
 
+COPY --chown=fact:fact 0002_main_cfg.patch.template /opt/FACT_core/0002_main_cfg.patch.template
+
 COPY entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
