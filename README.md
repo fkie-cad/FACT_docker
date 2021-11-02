@@ -1,51 +1,24 @@
 # Docker image for FACT_core
 The docker image provides an installation of all fact components (db, frontend,
 backend). Currently, you have to build it yourself, but we plan to provide a
-prebuilt image via Dockerhub. For instructions see [Advanced usage](#advanced-usage).
+prebuilt image via Dockerhub. For instructions see [Usage](#usage).
 
 Because FACT uses docker itself, the docker socket from the host will be
 passed to the container. Please make sure that your user is a member of the
 `docker` group.
 
-## Most simple usage
-If you just want to run FACT and not worry about anything we've got your back.
-Be aware that all state of FACT is only in the container so if you pull a new
-FACT version everything (most importantly your database) will be lost.
-
-> Note that the image is currently not uploaded so you have to
-[build](#advanced-usage) it yourself
-
-Simply run
-```bash
-# Pull docker containers needed on the host
-# This is just needed the first time you use FACT
-docker run \
-	--rm \
-	-it \
-	--group-add $(getent group docker | cut -d: -f3) \
-	-v /var/run/docker.sock:/var/run/docker.sock \
-	fkiecad/fact pull-containers
-
-# The docker daemon will write some things in there
-mkdir /tmp/fact-docker-tmp && chgrp docker /tmp/fact-docker-tmp
-
-# Start fact
-docker run \
-	-it \
-	--name fact \
-	--group-add $(getent group docker | cut -d: -f3) \
-	-v /var/run/docker.sock:/var/run/docker.sock \
-	-v /tmp/fact-docker-tmp:/tmp/fact-docker-tmp \
-	-p 5000:5000 \
-	fkiecad/fact start
-
-```
-
-## Advanced usage
+## Usage
 For more advanced usage we provide a Python script to cover most usecases.
 If your usecase is not supported feel free to open a PR or hack it up privately.
 
-Run `./start.py --help` to get help abuot the usage of the script.
+Probably the most imporant command is `./start.py build`.
+After that you might run:
+```sh
+$ mkdir ~/fact_mongo && mkdir ~/fact_data
+$ ./start.py run --wt-mongodb-path ~/fact_mongo --fw-data-path ~/fact_data
+```
+
+Use `./start.py --help` to get help about the usage of the script.
 
 If you use `--config` and change anything related to the mongodb
 database run ```touch <your fact_wt_mongodb path>/REINITIALIZE_DB```
@@ -68,12 +41,17 @@ The docker entrypoint accepts three arguments.
 If you want to have a distributed setup you have to build the three images.
 For this you can simply adapt the Dockerfile to install the respective
 components and change the entrypoint.
-Then follow the instructions in [INSTALL.md](../INSTALL.md) for a distributed
-setup.
+Then follow the instructions in
+[INSTALL.md](https://github.com/fkie-cad/FACT_core/blob/master/INSTALL.md) for
+a distributed setup.
 You should also have a look at [start.py](./start.py) to see what arguments docker should
 be started with.
 
 # Workarounds used
+If you tinker around with the docker image you might encounter some strange
+behavior caused by the following workarounds.
+
+## Docker in docker
 As FACT uses docker heavily, we pass the docker socket to the container.
 
 One use of docker is the unpacker. Docker is started with something along the
@@ -82,7 +60,9 @@ lines of
 
 This means that when FACT runs inside an container it must have access to
 `PATH_ON_DOCKER_HOST`.
-Currently `PATH_ON_DOCKER_HOST` is always a subdirectory of `temp_dir_path` but
-created dynamically (similar to `mktemp`). This means that we can't know in
-advance what directories on the host will be needed in the container. To work
+Currently `PATH_ON_DOCKER_HOST` is always a subdirectory of `temp_dir_path` and
+created dynamically (similar to `mktemp`) or it is a subdirectory of the
+`fw-data-path`.
+Can't know in advance what directories on the host will be needed in the
+container because of the dynamically created directorys. To work
 around this we simply mount `temp_dir_path` in the container.
