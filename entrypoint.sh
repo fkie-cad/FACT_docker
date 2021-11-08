@@ -29,6 +29,7 @@ case "$1" in
     ;;
     "start-branch")
         shift 1
+        git --git-dir=/opt/FACT_core/.git fetch
         git --git-dir=/opt/FACT_core/.git checkout $1
         shift 1
         start $@
