@@ -47,7 +47,7 @@ def run(args):
     os.chown(args.docker_dir, -1, docker_gid)
 
     # TODO the config in the container might mismatch with what we have configured here
-    config_cmd = f"--mount type=bind,source={args.config_path},destination=/opt/FACT_core/src/config"
+    config_cmd = f"--mount type=bind,source={args.config_path},destination=/opt/FACT_core/src/config,ro=true"
     if args.config_path is None:
         config_cmd = ""
 
