@@ -17,7 +17,7 @@ start () {
     radare2_host=$(/sbin/ip route|awk '/default/ { print $3 }')
 
     # If the user provides a different configuration the patch will fail
-    sed "s/RADARE2_HOST/$radare2_host/" /opt/FACT_core/0002_main_cfg.patch.template | patch /opt/FACT_core/src/config/main.cfg || true
+    sed "s/RADARE2_HOST/$radare2_host/" /opt/FACT_core/0002_main_cfg.patch.template | patch --forward /opt/FACT_core/src/config/main.cfg || true
 
     exec /opt/FACT_core/start_all_installed_fact_components "$@"
 }
