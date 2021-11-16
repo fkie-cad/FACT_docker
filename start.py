@@ -17,6 +17,12 @@ def pass_docker_socket_args(args):
     """
 
 
+def mount_relevant_dirs_for_docker_args(docker_dir):
+    return f"""\
+    --mount type=bind,source={docker_dir},destination={docker_dir} \
+    """
+
+
 def build(args):
     cmd = f"docker build --rm -t {args.tag} ."
 
@@ -25,8 +31,10 @@ def build(args):
 
 def pytest(args):
     # Some test use docker
+    # We use the default docker-dir because the user has no chance to change it when running the tests
     cmd = f"""docker run \
     {pass_docker_socket_args(args)} \
+    {mount_relevant_dirs_for_docker_args("/tmp/fact-docker-tmp/")} \
     -it \
     --rm \
     {args.image}
@@ -75,6 +83,7 @@ def run(args):
 
     cmd = f"""docker run \
     {pass_docker_socket_args(args)} \
+    {mount_relevant_dirs_for_docker_args(args.docker_dir)} \
     -it \
     --name {args.name} \
     --hostname {args.name} \
@@ -82,7 +91,6 @@ def run(args):
     --mount type=bind,source={args.wt_mongodb_path},destination=/media/data/fact_wt_mongodb \
     --group-add {fw_data_path_gid} \
     --mount type=bind,source={args.fw_data_path},destination=/media/data/fact_fw_data \
-    --mount type=bind,source={args.docker_dir},destination={args.docker_dir} \
     -p {args.port}:5000 \
     {config_cmd} \
     {args.image} {start_cmd}
