@@ -2,7 +2,7 @@ diff --git a/src/config/main.cfg b/src/config/main.cfg
 index 55bf730d..d0bb80e9 100644
 --- a/src/config/main.cfg
 +++ b/src/config/main.cfg
-@@ -140,4 +140,4 @@ authentication = false
+@@ -141,4 +141,4 @@ authentication = false
  nginx = false
  intercom_poll_delay = 1.0
  # this is used in redirecting to the radare web service.  It should generally be the IP or host name when running on a remote host.
