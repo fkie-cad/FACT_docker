@@ -30,8 +30,8 @@ def build(args):
 
 
 def pytest(args):
-    # Some test use docker
-    # We use the default docker-dir because the user has no chance to change it when running the tests
+    # We use the default tmpdir because the user has no chance to change it when running the tests
+    pathlib.Path("/tmp/fact-docker-tmp/").mkdir(mode=0o770, parents=True, exist_ok=True)
     cmd = f"""docker run \
     {pass_docker_socket_args(args)} \
     {mount_relevant_dirs_for_docker_args("/tmp/fact-docker-tmp/")} \
