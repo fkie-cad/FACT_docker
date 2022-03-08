@@ -11,7 +11,7 @@ passed to the container. Please make sure that your user is a member of the
 For more advanced usage we provide a Python script to cover most usecases.
 If your usecase is not supported feel free to open a PR or hack it up privately.
 
-Probably the most imporant command is `./start.py build`.
+Probably the most important command is `./start.py build`.
 After that you might run:
 ```sh
 $ mkdir ~/fact_mongo && mkdir ~/fact_data
@@ -58,11 +58,11 @@ One use of docker is the unpacker. Docker is started with something along the
 lines of
 `docker run -v PATH_ON_DOCKER_HOST:HARDCODED_PATH_USED_IN_THE_CONTAINER unpacker`.
 
-This means that when FACT runs inside an container it must have access to
+This means that when FACT runs inside a container it must have access to
 `PATH_ON_DOCKER_HOST`.
 Currently `PATH_ON_DOCKER_HOST` is always a subdirectory of `temp_dir_path` and
 created dynamically (similar to `mktemp`) or it is a subdirectory of the
 `fw-data-path`.
 Can't know in advance what directories on the host will be needed in the
-container because of the dynamically created directorys. To work
+container because of the dynamically created directories. To work
 around this we simply mount `temp_dir_path` in the container.
