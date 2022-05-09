@@ -1,0 +1,27 @@
+FROM ubuntu:focal
+
+# Upgrade system and install dependencies of the installer
+RUN apt -y update && apt -y upgrade && \
+    DEBIAN_FRONTEND="noninteractive" apt -y install --no-install-recommends \
+        ca-certificates \
+        git \
+        lsb-release \
+        sudo \
+        tzdata \
+        wget && \
+    apt clean
+
+RUN useradd -r --no-create-home -d /var/log/fact fact && \
+    printf 'fact	ALL=(ALL:ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/99_fact && \
+    mkdir /opt/FACT_core && chown fact: /opt/FACT_core && \
+    mkdir /var/log/fact && chown fact: /var/log/fact
+
+USER fact:fact
+WORKDIR /var/log/fact
+
+# TODO use 4.0 tag
+RUN git clone --branch docker-fact-4.0 https://github.com/fkie-cad/FACT_core.git /opt/FACT_core
+
+RUN /opt/FACT_core/src/install/pre_install.sh
+RUN FACT_INSTALLER_SKIP_DOCKER=y /opt/FACT_core/src/install.py --common && \
+    sudo apt clean

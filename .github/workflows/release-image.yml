@@ -1,0 +1,50 @@
+name: Release Docker image
+
+on: [release]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build images
+        run: make
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to ghcr.io Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.repository_owner }} --password-stdin
+
+      - name: Push images
+        run: |
+          PREFIX_GHCR=ghcr.io/${{ github.repository_owner }}
+          PREFIX_DOCKERHUB=ghcr.io/${{ github.repository_owner }}
+          VERSION=4.0
+
+          for component in backend frontend scripts
+          do
+              LOCAL_IMAGE=fact-core-${component}:${VERSION}
+              REMOTE_IMAGE_GHCR=${PREFIX_GHCR}/${LOCAL_IMAGE}
+              REMOTE_IMAGE_DOCKERHUB=${PREFIX_DOCKERHUB}/${LOCAL_IMAGE}
+
+              docker tag ${LOCAL_IMAGE} ${REMOTE_IMAGE_GHCR}
+              docker tag ${LOCAL_IMAGE} ${REMOTE_IMAGE_DOCKERHUB}
+
+              docker push ${REMOTE_IMAGE_GHCR}
+              docker push ${REMOTE_IMAGE_DOCKERHUB}
+          done

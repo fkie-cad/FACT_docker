@@ -1,0 +1,30 @@
+# General Scripts (Tag as fkie-cad/fact-core-scripts:4.0)
+# =============================================================================
+# TODO This is only needed because the init-postgres.py script has dependencies
+# on FACT_core.
+# Many scripts that one would expect to be able to run independently in fact cant
+# In the future we should maybe extract these in a pip module
+FROM alpine:3.15
+
+RUN apk add --no-cache \
+        bash \
+        git \
+        docker \
+        docker-compose \
+        postgresql12-client \
+        python3 \
+        py3-distro \
+        py3-pip \
+        py3-psutil \
+        py3-psycopg2 \
+        py3-requests \
+        py3-sqlalchemy
+
+RUN pip install \
+        git+https://github.com/fkie-cad/common_helper_files.git
+
+RUN git clone --branch docker-fact-4.0 https://github.com/fkie-cad/FACT_core.git /opt/FACT_core
+
+COPY entrypoint.sh /usr/local/bin/
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

@@ -1,0 +1,88 @@
+# FACT_DOCKER_DOCKER_GID
+# - The group id of the docker group on the host
+# FACT_DOCKER_DOCKER_MOUNT_BASE_DIR
+# - Path to the docker-mount-base-dir as specified in main.cfg
+# FACT_DOCKER_FIRMWARE_FILE_STORAGE_DIR
+# - Path to the firmware-file-storage-directory as specified in main.cfg
+# FACT_DOCKER_FIRMWARE_FILE_STORAGE_DIR_GID
+# - The group id of the group of FACT_DOCKER_FIRMWARE_FILE_STORAGE_DIR
+# FACT_DOCKER_FRONTEND_PORT
+# - The port that the webserver should run on
+# FACT_DOCKER_MAIN_CFG_PATH
+# - Path to the main FACT config main.cfg
+# FACT_DOCKER_POSTGRES_PASSWORD
+# - Password for postgres admin user
+# FACT_DOCKER_UWSGI_CONFIG_INI_PATH
+# - Path to the uwsgi-config.ini
+services:
+  fact-frontend:
+    image: fkie-cad/fact-core-frontend:4.0
+    command: start-frontend
+    ports:
+      - "${FACT_DOCKER_FRONTEND_PORT:-5000}:5000"
+    networks:
+      - fact-network
+    group_add:
+      - "${FACT_DOCKER_DOCKER_GID}"
+    volumes:
+        # TODO: remove this
+        # radare is started via docker-compose
+      - type: bind
+        source: "${DOCKER_HOST:-/var/run/docker.sock}"
+        target: /var/run/docker.sock
+      - type: bind
+        source: "${FACT_DOCKER_MAIN_CFG_PATH}"
+        target: /opt/FACT_core/src/config/main.cfg
+      - type: bind
+        source: "${FACT_DOCKER_UWSGI_CONFIG_INI_PATH}"
+        target: /opt/FACT_core/src/config/uwsgi_config.ini
+    depends_on:
+      - database
+      - redis
+
+  fact-backend:
+    image: fkie-cad/fact-core-backend:4.0
+    command: start-backend
+    networks:
+      - fact-network
+    group_add:
+      - "${FACT_DOCKER_DOCKER_GID}"
+      - "${FACT_DOCKER_FIRMWARE_FILE_STORAGE_DIR_GID}"
+    volumes:
+      - type: bind
+        source: "${DOCKER_HOST:-/var/run/docker.sock}"
+        target: /var/run/docker.sock
+      - type: bind
+        source: "${FACT_DOCKER_MAIN_CFG_PATH}"
+        target: /opt/FACT_core/src/config/main.cfg
+      - type: bind
+        source: "${FACT_DOCKER_UWSGI_CONFIG_INI_PATH}"
+        target: /opt/FACT_core/src/config/uwsgi_config.ini
+      - type: bind
+        source: "${FACT_DOCKER_DOCKER_MOUNT_BASE_DIR}"
+        target: /tmp/fact-docker-mount-base-dir/
+      - type: bind
+        source: "${FACT_DOCKER_FIRMWARE_FILE_STORAGE_DIR}"
+        target: /media/data/fact_fw_data
+    depends_on:
+      - database
+      - redis
+
+  database:
+    image: postgres
+    networks:
+      - fact-network
+    environment:
+        POSTGRES_PASSWORD: "${FACT_DOCKER_POSTGRES_PASSWORD}"
+    expose:
+      - 5432
+
+  redis:
+    image: redis
+    networks:
+      - fact-network
+    expose:
+      - 6379
+
+networks:
+  fact-network: {}

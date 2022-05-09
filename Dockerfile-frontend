@@ -1,0 +1,16 @@
+# Frontend (Tag as fkie-cad/fact-core-frontend:4.0)
+# =============================================================================
+FROM fact-core-common:4.0
+USER fact:fact
+
+RUN FACT_INSTALLER_SKIP_DOCKER=y /opt/FACT_core/src/install.py --frontend --no-common && \
+    sudo apt clean
+
+USER root:root
+RUN rm /etc/sudoers.d/99_fact
+# Remove the default config to ensure that is is always mounted
+RUN rm -f /opt/FACT_core/src/config/uwsgi_config.ini /opt/FACT_core/src/config/main.cfg
+USER fact:fact
+
+COPY entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

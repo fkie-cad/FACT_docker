@@ -1,57 +1,49 @@
 # Docker image for FACT_core
-The docker image provides an installation of all fact components (db, frontend,
-backend). Currently, you have to build it yourself, but we plan to provide a
-prebuilt image via Dockerhub. For instructions see [Usage](#usage).
+This repository mainly contains the `Dockerfile` and `docker-compose.yml` to
+build and run a containerized installation of FACT_core.
+FACT is split in two images (backend and frontend).
 
 Because FACT uses docker itself, the docker socket from the host will be
 passed to the container. Please make sure that your user is a member of the
 `docker` group.
 
 ## Usage
-For more advanced usage we provide a Python script to cover most usecases.
-If your usecase is not supported feel free to open a PR or hack it up privately.
-
-Probably the most important command is `./start.py build`.
-After that you might run:
+The following lines of shell should get you started to use FACT in docker.
 ```sh
-$ mkdir ~/fact_mongo && mkdir ~/fact_data
-$ ./start.py run --wt-mongodb-path ~/fact_mongo --fw-data-path ~/fact_data
+$ docker pull \
+    ghcr.io/fkie-cad/fact-core-frontend:4.0 \
+    ghcr.io/fkie-cad/fact-core-backend:4.0 \
+    ghcr.io/fkie-cad/fact-core-scripts:4.0
+$ ./start.py pull
+$ ./start.py compose-env \
+    --firmware-file-storage-dir path_to_fw_data_dir
+    # Have a look if it looks right
+$ eval $(./start.py compose-env --firmware-file-storage-dir path_to_fw_data_dir)
+$ export FACT_DOCKER_POSTGRES_PASSWORD=mypassword
+$ docker compose up database
+$ ./start.py initialize-db \
+    --network fact-docker-fact-network
+$ docker compose up
 ```
+
+We provide a `docker-compose.yml` and a python script to get FACT in docker
+running.
+The `docker-compose.yml` is parameterized with environment variables.
+All variables are prefixed by `FACT_DOCKER_`.
+The variables can be set to sane defaults with `./start.py compose-env`.
+For documentation about their meanings see `docker-compose.yml`.
 
 Use `./start.py --help` to get help about the usage of the script.
 
-If you use `--config` and change anything related to the mongodb
-database run ```touch <your fact_wt_mongodb path>/REINITIALIZE_DB```
-(i.e. `touch /media/data/fact_wt_mongodb/REINITIALIZE_DB`).
-This will tell the container to (re)initialize the database.
-If you use the container the first time the script does this automatically for
-you.
-Also be aware that the `temp_dir_path` in `main.cfg` has to match the path
-specified by `--docker-dir`.
+## Development of FACT\_core in FACT\_docker
+Since the FACT\_core is pretty invasive is might be desirable to not install FACT on your system and use this docker image instead.
+To have access to a FACT installation you can for example start the container with `--entrypoint /bin/bash`.
 
-## Entrypoint
-The docker entrypoint accepts three arguments.
-`start` to start the container.
+## Bugs
+FACT\_docker is in early stages and has some bugs that currently can't be fixed due to FACT\_core's architecture.
+These bugs are documented here.
 
-`pull-containers` to pull docker containers needed on the host.
-
-`start-branch` to checkout a different branch before running FACT.
-
-## Distributed setup
-If you want to have a distributed setup you have to build the three images.
-For this you can simply adapt the Dockerfile to install the respective
-components and change the entrypoint.
-Then follow the instructions in
-[INSTALL.md](https://github.com/fkie-cad/FACT_core/blob/master/INSTALL.md) for
-a distributed setup.
-You should also have a look at [start.py](./start.py) to see what arguments docker should
-be started with.
-
-# Workarounds used
-If you tinker around with the docker image you might encounter some strange
-behavior caused by the following workarounds.
-
-## Docker in docker
+### Docker in docker
 As FACT uses docker heavily, we pass the docker socket to the container.
 
 One use of docker is the unpacker. Docker is started with something along the
@@ -60,9 +52,5 @@ lines of
 
 This means that when FACT runs inside a container it must have access to
 `PATH_ON_DOCKER_HOST`.
-Currently `PATH_ON_DOCKER_HOST` is always a subdirectory of `temp_dir_path` and
-created dynamically (similar to `mktemp`) or it is a subdirectory of the
-`fw-data-path`.
-Can't know in advance what directories on the host will be needed in the
-container because of the dynamically created directories. To work
-around this we simply mount `temp_dir_path` in the container.
+Currently `PATH_ON_DOCKER_HOST` is not always a subdirectory of `docker-mount-base-dir`.
+This mostly affects tests (where test data is mounted in containers).
