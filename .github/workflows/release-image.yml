@@ -1,6 +1,6 @@
 name: Release Docker image
 
-on: [release]
+on: [push]
 
 jobs:
   build-and-push:
