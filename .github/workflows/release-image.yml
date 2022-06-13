@@ -27,13 +27,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to registry
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.repository_owner }} --password-stdin
-
       - name: Push images
         run: |
           PREFIX_GHCR=ghcr.io/${{ github.repository_owner }}
-          PREFIX_DOCKERHUB=ghcr.io/${{ github.repository_owner }}
+          PREFIX_DOCKERHUB=hub.docker.com/${{ github.repository_owner }}
           VERSION=4.0
 
           for component in backend frontend scripts
