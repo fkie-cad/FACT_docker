@@ -53,7 +53,6 @@ def pytest(args):
 def pull(args):
     cmd = f"""docker run \
     {pass_docker_socket_args(args)} \
-    -it \
     --rm \
     {args.image} pull-containers
     """
@@ -77,18 +76,21 @@ def run(args):
     create_docker_mount_base_dir_with_correct_permissions(args.docker_mount_base_dir)
 
     # TODO the config in the container might mismatch with what we have configured here
-    config_cmd = f"--mount type=bind,source={args.config_path},destination=/opt/FACT_core/src/config,ro=true"
-    if args.config_path is None:
+    config_cmd = f"--mount type=bind,source={args.config_file},destination=/opt/FACT_core/src/config/main.cfg,ro=true"
+    if args.config_file is None:
         config_cmd = ""
 
     start_cmd = "start"
     if args.branch is not None:
         start_cmd = f"start-branch {args.branch}"
 
-    cmd = f"""docker run \
+    detach_flag = ""
+    if args.detach is not None:
+        detach_flag = "--detach"
+
+    cmd = f"""docker run {detach_flag} \
     {pass_docker_socket_args(args)} \
     {mount_relevant_dirs_for_docker_args(args.docker_mount_base_dir)} \
-    --detach \
     --name {args.name} \
     --hostname {args.name} \
     --group-add {mongodb_path_gid} \
@@ -142,8 +144,9 @@ def main():
     # We cant reasonably choose a default path for the following arguments
     run_p.add_argument("--wt-mongodb-path", required=True, help="The path to the fact_wt_mongodb directory on the host. The group must have rwx permissions.")
     run_p.add_argument("--fw-data-path", required=True, help="Path to fact_fw_data directory on the host. The group must have rwx permissions.")
-    run_p.add_argument("--config-path", help="The directory that contains the FACT configuration. If ommited use the config in the container.")
+    run_p.add_argument("--config-file", help="The file that contains the main.cfg FACT configuration. If ommited use the config in the container.")
     run_p.add_argument("--branch", help="The branch of FACT to start")
+    run_p.add_argument("--detach", help="Indicates if FACT should start in second plane or not.")
 
     start_p = subparsers.add_parser("start", help="Start container", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     start_p.set_defaults(func=start)
