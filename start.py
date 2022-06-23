@@ -88,7 +88,7 @@ def run(args):
     cmd = f"""docker run \
     {pass_docker_socket_args(args)} \
     {mount_relevant_dirs_for_docker_args(args.docker_mount_base_dir)} \
-    -it \
+    --detach \
     --name {args.name} \
     --hostname {args.name} \
     --group-add {mongodb_path_gid} \

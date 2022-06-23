@@ -8,7 +8,7 @@ start () {
     # usecase to change the database path inside the docker container
     if [ -e /media/data/fact_wt_mongodb/REINITIALIZE_DB ]; then
         python3 /opt/FACT_core/src/init_database.py && \
-            rm /media/data/fact_wt_mongodb/REINITIALIZE_DB
+            rm -rf /media/data/fact_wt_mongodb/REINITIALIZE_DB
     fi
 
     # TODO This only works when the radare server runs on the docker host
