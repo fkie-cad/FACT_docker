@@ -1,0 +1,54 @@
+name: Release Docker image
+
+on:
+  push:
+    branches:
+      - main
+    release:
+      types: [published]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build images
+        run: |
+          export FACT_DOCKER_VERSION=4.0.1
+          make
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to ghcr.io Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push images
+        run: |
+          PREFIX_GHCR=ghcr.io/${{ github.repository_owner }}
+          PREFIX_DOCKERHUB=${{ github.repository_owner }}
+          FACT_DOCKER_VERSION=4.0.1
+
+          for component in backend frontend scripts
+          do
+              LOCAL_IMAGE=fact-core-${component}:${FACT_DOCKER_VERSION}
+              REMOTE_IMAGE_GHCR=${PREFIX_GHCR}/${LOCAL_IMAGE}
+              REMOTE_IMAGE_DOCKERHUB=${PREFIX_DOCKERHUB}/${LOCAL_IMAGE}
+
+              docker tag ${LOCAL_IMAGE} ${REMOTE_IMAGE_GHCR}
+              docker tag ${LOCAL_IMAGE} ${REMOTE_IMAGE_DOCKERHUB}
+
+              docker push ${REMOTE_IMAGE_GHCR}
+              docker push ${REMOTE_IMAGE_DOCKERHUB}
+          done
