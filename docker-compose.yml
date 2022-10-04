@@ -25,11 +25,13 @@ services:
     group_add:
       - "${FACT_DOCKER_DOCKER_GID}"
     volumes:
-        # TODO: remove this
-        # radare is started via docker-compose
+        # This is needed for generating pdf reports.
       - type: bind
         source: "${DOCKER_HOST:-/var/run/docker.sock}"
         target: /var/run/docker.sock
+      - type: bind
+        source: "${FACT_DOCKER_DOCKER_MOUNT_BASE_DIR}"
+        target: /tmp/fact-docker-mount-base-dir/
       - type: bind
         source: "${FACT_DOCKER_MAIN_CFG_PATH}"
         target: /opt/FACT_core/src/config/main.cfg
