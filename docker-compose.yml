@@ -76,6 +76,8 @@ services:
         POSTGRES_PASSWORD: "${FACT_DOCKER_POSTGRES_PASSWORD}"
     expose:
       - 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis
@@ -86,3 +88,6 @@ services:
 
 networks:
   fact-network: {}
+
+volumes:
+  postgres_data:
