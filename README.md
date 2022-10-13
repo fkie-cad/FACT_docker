@@ -8,7 +8,7 @@ passed to the container. Please make sure that your user is a member of the
 `docker` group.
 
 ## Usage
-The following lines of shell should get you started to use FACT in docker.
+To initialize the containers the the following lines of shell should get you started.
 ```sh
 $ docker pull ghcr.io/fkie-cad/fact-core-frontend:4.0.1
 $ docker pull ghcr.io/fkie-cad/fact-core-backend:4.0.1
@@ -25,6 +25,12 @@ $ ./start.py initialize-db \
     --network fact_docker_fact-network
 $ docker-compose up
 ```
+
+To shut down the containers use `docker-compose stop` (Or press Ctrl+C).
+When you want to start them again use `docker-compose start`.
+Don't forget to run `eval $(./start.py compose-env --firmware-file-storage-dir path_to_fw_data_dir)`
+beforehand.
+
 
 We provide a `docker-compose.yml` and a python script to get FACT in docker
 running.
