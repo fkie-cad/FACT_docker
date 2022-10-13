@@ -77,7 +77,7 @@ services:
     expose:
       - 5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - fact_postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis
@@ -90,5 +90,5 @@ networks:
   fact-network: {}
 
 volumes:
-  postgres_data:
+  fact_postgres_data:
     external: true

@@ -19,7 +19,7 @@ $ ./start.py compose-env \
     # Have a look if it looks right
 $ eval $(./start.py compose-env --firmware-file-storage-dir path_to_fw_data_dir)
 $ export FACT_DOCKER_POSTGRES_PASSWORD=mypassword
-$ docker volume create postgres_data
+$ docker volume create fact_postgres_data
 $ docker-compose up -d database
 # Wait some seconds until the db is ready
 $ ./start.py initialize-db \
