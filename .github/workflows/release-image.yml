@@ -33,7 +33,7 @@ jobs:
       - name: Push images
         run: |
           PREFIX_GHCR=ghcr.io/${{ github.repository_owner }}
-          PREFIX_DOCKERHUB=${{ secrets.DOCKERHUB_USERNAME }}
+          PREFIX_DOCKERHUB=${{ secrets.DOCKERHUB_ORGANIZATION }}
           FACT_DOCKER_VERSION=4.0.1
 
           for component in backend frontend scripts
