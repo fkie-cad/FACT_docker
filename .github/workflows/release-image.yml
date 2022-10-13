@@ -1,11 +1,7 @@
 name: Release Docker image
 
 on:
-  push:
-    branches:
-      - main
-    release:
-      types: [published]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
