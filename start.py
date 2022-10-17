@@ -36,7 +36,7 @@ def pull(args):
     {pass_docker_socket_args(args)} \
     -it \
     --rm \
-    fkie-cad/fact-core-scripts:{fact_version} pull-containers
+    ghcr.io/fkie-cad/fact-core-scripts:{fact_version} pull-containers
     """
 
     subprocess.run(cmd.split())
@@ -48,7 +48,7 @@ def initialize_db(args):
     --mount type=bind,source={args.main_cfg_path},destination=/opt/FACT_core/src/config/main.cfg,ro=true \
     --rm \
     --network {args.network} \
-    fkie-cad/fact-core-scripts:{fact_version} \
+    ghcr.io/fkie-cad/fact-core-scripts:{fact_version} \
     initialize-db
     """
 
