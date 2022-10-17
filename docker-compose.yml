@@ -16,7 +16,7 @@
 # - Path to the uwsgi-config.ini
 services:
   fact-frontend:
-    image: fkie-cad/fact-core-frontend:${FACT_DOCKER_VERSION}
+    image: ghcr.io/fkie-cad/fact-core-frontend:${FACT_DOCKER_VERSION}
     command: start-frontend
     ports:
       - "${FACT_DOCKER_FRONTEND_PORT:-5000}:5000"
@@ -43,7 +43,7 @@ services:
       - redis
 
   fact-backend:
-    image: fkie-cad/fact-core-backend:${FACT_DOCKER_VERSION}
+    image: ghcr.io/fkie-cad/fact-core-backend:${FACT_DOCKER_VERSION}
     command: start-backend
     networks:
       - fact-network
