@@ -16,7 +16,7 @@ $ docker pull ghcr.io/fkie-cad/fact-core-scripts:4.0.1
 $ ./start.py pull
 $ ./start.py compose-env \
     --firmware-file-storage-dir path_to_fw_data_dir
-    # Have a look if it looks right
+    # Have a look if it looks right and create directories when needed.
 $ eval $(./start.py compose-env --firmware-file-storage-dir path_to_fw_data_dir)
 $ export FACT_DOCKER_POSTGRES_PASSWORD=mypassword
 $ docker volume create fact_postgres_data
